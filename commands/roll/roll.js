@@ -28,13 +28,15 @@ module.exports = {
         try {
             if (input) {
                 console.log(`rolling by pattern ${input}`);
-                await interaction.reply(rollByPattern(input));
+                let result = rollByPattern(input);
+                console.log(`Roll result: ${result}`)
+                await interaction.reply(`${input} => ${result}`);
             } else {
                 console.log('rolling by interaction');
                 await rollByInteraction(interaction);
             }
         } catch (error) {
-            console.log(`ERROR: ${error.message}`);
+            console.error(error.message);
             await interaction.reply({
                 content: `ERROR: ${error.message}`,
                 ephemeral: true,
@@ -43,39 +45,20 @@ module.exports = {
     },
 };
 
-function rollOne(max) {
-    const result = Math.floor(Math.random() * max + 1);
-    console.log('rolled ' + result + ' out of ' + max);
-    return result;
-}
-
 function rollByPattern(input) {
-    input = input || 'W100';
+    input = input.toUpperCase();
     console.log('parsing ' + input);
     const match = input.match(DICE_PATTERN);
     if (!match) {
         throw new Error("Invalid pattern")
     }
-
-    console.log(match);
-
     const diceAmount = parseInt(match[1]) || 1;
-    const diceType = parseInt(match[2]);
+    const diceType = 'W' + parseInt(match[2]);
     const bonusValue = parseInt(match[3]) || 0;
 
-    let total = 0;
-    let result = '';
-    for (let i = 0; i < diceAmount; i++) {
-        let roll = rollOne(diceType);
-        total += roll;
-        result += ` ${roll}`;
-    }
+    let diceRoll = new DiceRoll(diceType, diceAmount, bonusValue);
 
-    total += bonusValue;
-    result = `${input} =>${result} +${bonusValue} => ${total}`;
-
-    console.log('total result ' + result);
-    return result;
+    return diceRoll.toString();
 }
 
 async function rollByInteraction(interaction) {
@@ -83,13 +66,13 @@ async function rollByInteraction(interaction) {
     let currentDiceAmount = 0;
     let currentBonusValue = 0;
 
-    const interactiveResponse = await interaction.reply({
+    const interactiveReply = await interaction.reply({
         content: 'choose dice to roll',
         components: getActionRows(currentDiceType),
         ephemeral: true
     });
 
-    const collector = interactiveResponse.createMessageComponentCollector({});
+    const collector = interactiveReply.createMessageComponentCollector({});
 
     collector.on('collect', async buttonInteraction => {
         let [buttonType, buttonId] = buttonInteraction.customId.split('_');
@@ -127,7 +110,7 @@ async function rollByInteraction(interaction) {
                     case 'roll':
                         let diceRoll = new DiceRoll(currentDiceType, currentDiceAmount, currentBonusValue);
                         console.log(`Roll result: ${diceRoll.toString()}`)
-                        interaction.followUp(diceRoll.toString());
+                        interaction.followUp(`${diceRoll.getPattern()} => ${diceRoll.toString()}`);
                         break;
                     case 'repeat':
                         break;
@@ -140,7 +123,6 @@ async function rollByInteraction(interaction) {
                 break;
         }
 
-        //await interaction.update(`current roll: ${currentDiceAmount} ${currentDiceType}`);
         await buttonInteraction.update({
             content: currentDiceType ? `current roll: ${currentDiceAmount} ${currentDiceType} +${currentBonusValue}` : 'choose dice to roll',
             components: getActionRows(currentDiceType),
@@ -178,6 +160,10 @@ class DiceRoll {
         let rolls = `${this.rolls.join(' ')}`;
         let bonus = this.bonusValue > 0 ? ` +${this.bonusValue}` : '';
         return `${rolls}${bonus} => ${this.total}`;
+    }
+
+    getPattern() {
+        return `${this.diceAmount}${this.diceType}` + this.bonusValue > 0 ? `+${this.bonusValue}` : '';
     }
 }
 
