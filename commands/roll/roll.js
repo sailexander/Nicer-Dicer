@@ -47,7 +47,6 @@ module.exports = {
 
 function rollByPattern(input) {
     input = input.toUpperCase();
-    console.log('parsing ' + input);
     const match = input.match(DICE_PATTERN);
     if (!match) {
         throw new Error("Invalid pattern")
@@ -76,7 +75,7 @@ async function rollByInteraction(interaction) {
 
     collector.on('collect', async buttonInteraction => {
         let [buttonType, buttonId] = buttonInteraction.customId.split('_');
-        console.log(`button interaction: ${buttonType} ${buttonId}`);
+        console.log(`>> ${interaction.member.guild.name}|${interaction.user.globalName} pressed ${buttonType} ${buttonId}`);
 
         switch (buttonType) {
             case 'dice':
@@ -111,8 +110,6 @@ async function rollByInteraction(interaction) {
                         let diceRoll = new DiceRoll(currentDiceType, currentDiceAmount, currentBonusValue);
                         console.log(`Roll result: ${diceRoll.toString()}`)
                         interaction.followUp(`${diceRoll.getPattern()} => ${diceRoll.toString()}`);
-                        break;
-                    case 'repeat':
                         break;
                     case 'reset':
                         currentDiceType = null;
@@ -163,7 +160,7 @@ class DiceRoll {
     }
 
     getPattern() {
-        return `${this.diceAmount}${this.diceType}` + this.bonusValue > 0 ? `+${this.bonusValue}` : '';
+        return `${this.diceAmount}${this.diceType}` + (this.bonusValue > 0 ? `+${this.bonusValue}` : '');
     }
 }
 
@@ -214,17 +211,17 @@ function getActionRows(currentDiceType) {
     //bonus value buttons
     const buttonResetValue = new ButtonBuilder()
         .setCustomId('bonus_reset')
-        .setLabel('=0')
+        .setLabel('+ 0')
         .setStyle(ButtonStyle.Secondary);
 
     const buttonAddOne = new ButtonBuilder()
         .setCustomId('bonus_one')
-        .setLabel('+1')
+        .setLabel('+ 1')
         .setStyle(ButtonStyle.Secondary);
 
     const buttonAddFive = new ButtonBuilder()
         .setCustomId('bonus_five')
-        .setLabel('+5')
+        .setLabel('+ 5')
         .setStyle(ButtonStyle.Secondary);
 
     //action buttons
@@ -234,12 +231,6 @@ function getActionRows(currentDiceType) {
         .setStyle(ButtonStyle.Success)
         .setDisabled(currentDiceType === null);
 
-    const buttonRepeat = new ButtonBuilder()
-        .setCustomId('action_repeat')
-        .setLabel('🔁')
-        .setStyle(ButtonStyle.Success)
-        .setDisabled();
-
     const buttonReset = new ButtonBuilder()
         .setCustomId('action_reset')
         .setLabel('❌')
@@ -247,13 +238,13 @@ function getActionRows(currentDiceType) {
         .setDisabled(currentDiceType === null);
 
     const row1 = new ActionRowBuilder()
-        .addComponents(buttonRepeat, buttonW4, buttonW6, buttonW8, buttonW10);
+        .addComponents(buttonW4, buttonW6, buttonW8, buttonW10, buttonW12);
 
     const row2 = new ActionRowBuilder()
-        .addComponents(buttonReset, buttonW12, buttonW20, buttonW100);
+        .addComponents(buttonW20, buttonW100, buttonResetValue, buttonAddOne, buttonAddFive);
 
     const row3 = new ActionRowBuilder()
-        .addComponents(buttonRoll, buttonResetValue, buttonAddOne, buttonAddFive);
+        .addComponents(buttonRoll, buttonReset);
 
     return [row1, row2, row3];
 }
