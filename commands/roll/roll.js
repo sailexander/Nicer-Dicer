@@ -1,6 +1,5 @@
-const { ButtonBuilder, ButtonStyle, SlashCommandBuilder, ActionRowBuilder } = require('discord.js');
+const { ButtonBuilder, ButtonStyle, SlashCommandBuilder, ActionRowBuilder, userMention, MembershipScreeningFieldType } = require('discord.js');
 
-//const DICE_PATTERN = /^[1-9]?(w|W)(4|6|8|10|20|100)(\+\d{1,3})?$/;
 const DICE_PATTERN = /^(\d+)?W(\d+)(\+\d+)?$/;
 const DICE_TYPE = {
     W4: 'W4',
@@ -23,20 +22,21 @@ module.exports = {
         )
     ,
     async execute(interaction) {
+        console.log(`>> ${interaction.member.guild.name}|${interaction.user.globalName} used /${interaction.commandName}`);
         let input = interaction.options.getString('pattern');
-        console.log(`pattern provided: ${input}`);
+        
         try {
             if (input) {
-                console.log('rolling by pattern');
+                console.log(`rolling by pattern ${input}`);
                 await interaction.reply(rollByPattern(input));
             } else {
                 console.log('rolling by interaction');
                 await rollByInteraction(interaction);
             }
         } catch (error) {
-            console.log(error.message);
+            console.log(`ERROR: ${error.message}`);
             await interaction.reply({
-                content: error.message,
+                content: `ERROR: ${error.message}`,
                 ephemeral: true,
             });
         }
@@ -99,7 +99,6 @@ async function rollByInteraction(interaction) {
             case 'dice':
 
                 if (currentDiceType === null) {
-                    console.log(`set dice type to ${buttonId}`);
                     currentDiceType = buttonId;
                     currentDiceAmount = 1;
                 } else if (currentDiceType === buttonId) {
@@ -127,6 +126,7 @@ async function rollByInteraction(interaction) {
                 switch (buttonId) {
                     case 'roll':
                         let diceRoll = new DiceRoll(currentDiceType, currentDiceAmount, currentBonusValue);
+                        console.log(`Roll result: ${diceRoll.toString()}`)
                         interaction.followUp(diceRoll.toString());
                         break;
                     case 'repeat':
@@ -154,8 +154,6 @@ class DiceRoll {
         this.diceMax = parseInt(this.diceType.substring(1));
         this.diceAmount = diceAmount;
         this.bonusValue = bonusValue;
-        console.log(this.diceType);
-        console.log(this.diceMax);
         this.#evaluate();
     }
 
@@ -174,8 +172,6 @@ class DiceRoll {
             this.total += roll;
         }
         this.total += this.bonusValue;
-        console.log(this.rolls);
-        console.log(this.total);
     }
 
     toString() {
