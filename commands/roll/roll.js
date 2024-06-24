@@ -25,31 +25,37 @@ module.exports = {
     },
 };
 
-function roll(max) {
+function rollOne(max) {
     const result =  Math.floor(Math.random() * max + 1);
     console.log('rolled ' + result + ' out of ' + max);
     return result;
 }
 
 function parseInput(input) {
+    input = input || 'W100';
+    console.log('parsing ' + input);
     const match = input.match(DICE_PATTERN);
-    console.log(match);
-
     if (!match) {
         throw new Error("Invalid pattern")
     }
+
+    console.log(match);
 
     const diceAmount = parseInt(match[1]) || 1;
     const diceType = parseInt(match[2]);
     const bonusValue = parseInt(match[3]) || 0;
 
     let total = 0;
+    let result = '';
     for (let i=0; i< diceAmount; i++) {
-        total += roll(diceType);
+        let roll = rollOne(diceType);
+        total += roll;
+        result += ' ' + roll;
     }
 
     total += bonusValue;
+    result = input + ' =>' + result + ' +' + bonusValue + ' => ' + total;
 
-    console.log('total result ' + total);
-    return total.toString();
+    console.log('total result ' + result);
+    return result;
 }
