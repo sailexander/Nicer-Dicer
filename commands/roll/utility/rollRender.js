@@ -1,5 +1,6 @@
 const { createCanvas, Path2D, DOMMatrix } = require('@napi-rs/canvas');
 const { AttachmentBuilder } = require('discord.js');
+const { DiceRoll } = require('./diceRoll.js');
 
 const DICE_SIZE = 50;
 const MARGIN = 10;
