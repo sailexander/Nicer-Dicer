@@ -1,4 +1,5 @@
 const { ButtonBuilder, ButtonStyle, SlashCommandBuilder, ActionRowBuilder, userMention, MembershipScreeningFieldType } = require('discord.js');
+const { rollRender } = require('./utility/rollRender.js');
 
 const DICE_PATTERN = /^(\d+)?W(\d+)(\+\d+)?$/;
 const DICE_TYPE = {
@@ -109,7 +110,10 @@ async function rollByInteraction(interaction) {
                     case 'roll':
                         let diceRoll = new DiceRoll(currentDiceType, currentDiceAmount, currentBonusValue);
                         console.log(`Roll result: ${diceRoll.toString()}`)
-                        interaction.followUp(`${diceRoll.getPattern()} => ${diceRoll.toString()}`);
+                        interaction.followUp({
+                            content: `${diceRoll.getPattern()} => ${diceRoll.toString()}`,
+                            files: [await rollRender(diceRoll)],
+                        });
                         break;
                     case 'reset':
                         currentDiceType = null;
