@@ -19,10 +19,6 @@ async function rollRender(diceRoll) {
     context.fillStyle = COLOR_BACKGROUND;
     context.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    console.log(diceShapes);
-    console.log(diceShapes['W4']);
-    console.log(diceShapes['W4'][0][0]);
-
     for (let i in diceRoll.rolls) {
         renderDice(
             context,
@@ -52,7 +48,7 @@ async function rollRender(diceRoll) {
     return new AttachmentBuilder(await canvas.encode('png'), { name: 'roll.png' });
 }
 
-async function renderDice(context, shape, number, x, y, color = '#ffffff') {
+async function renderDice(context, shape, number, x, y, color = COLOR_DICE) {
     context.setTransform(1, 0, 0, 1, 0, 0);
 
     context.fillStyle = color;
@@ -70,7 +66,7 @@ async function renderDice(context, shape, number, x, y, color = '#ffffff') {
     context.strokeRect(25, 25, 25, 25); */
 }
 
-async function renderBonusValue(context, number, x, y, color = '#ffffff') {
+async function renderBonusValue(context, number, x, y, color = COLOR_DICE) {
     context.setTransform(1, 0, 0, 1, 0, 0);
 
     context.fillStyle = color;
@@ -86,7 +82,7 @@ async function renderBonusValue(context, number, x, y, color = '#ffffff') {
     context.strokeRect(25, 25, 25, 25); */
 }
 
-async function renderTotal(context, number, canvasWidth, y, color = '#ffffff') {
+async function renderTotal(context, number, canvasWidth, y, color = COLOR_DICE) {
     context.setTransform(1, 0, 0, 1, 0, 0);
 
     context.fillStyle = color;

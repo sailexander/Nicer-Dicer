@@ -29,17 +29,19 @@ module.exports = {
         
         try {
             if (input) {
-                console.log(`rolling by pattern ${input}`);
-                let result = rollByPattern(input);
-                console.log(`Roll result: ${result}`)
-                await interaction.reply(`${input} => ${result}`);
+                console.log('rolling by pattern');
+                let diceRoll = await rollByPattern(input);
+                await interaction.reply({
+                    files: [await rollRender(diceRoll)]
+                });
             } else {
                 console.log('rolling by interaction');
                 await rollByInteraction(interaction);
             }
+
         } catch (error) {
             console.error(error.message);
-            await interaction.reply({
+            await interaction.followUp({
                 content: `ERROR: ${error.message}`,
                 ephemeral: true,
             });
@@ -47,7 +49,7 @@ module.exports = {
     },
 };
 
-function rollByPattern(input) {
+async function rollByPattern(input) {
     input = input.toUpperCase();
     const match = input.match(DICE_PATTERN);
     if (!match) {
@@ -57,9 +59,7 @@ function rollByPattern(input) {
     const diceType = 'W' + parseInt(match[2]);
     const bonusValue = parseInt(match[3]) || 0;
 
-    let diceRoll = new DiceRoll(diceType, diceAmount, bonusValue);
-
-    return diceRoll.toString();
+    return new DiceRoll(diceType, diceAmount, bonusValue);
 }
 
 async function rollByInteraction(interaction) {
@@ -74,7 +74,7 @@ async function rollByInteraction(interaction) {
     });
 
     const collector = interactiveReply.createMessageComponentCollector({});
-
+    console.log(1);
     collector.on('collect', async buttonInteraction => {
         let [buttonType, buttonId] = buttonInteraction.customId.split('_');
         console.log(`>> ${interaction.member.guild.name}|${interaction.user.globalName} pressed ${buttonType} ${buttonId}`);
@@ -110,10 +110,8 @@ async function rollByInteraction(interaction) {
                 switch (buttonId) {
                     case 'roll':
                         let diceRoll = new DiceRoll(currentDiceType, currentDiceAmount, currentBonusValue);
-                        console.log(`Roll result: ${diceRoll.toString()}`)
-                        interaction.followUp({
-                            content: `${diceRoll.getPattern()} => ${diceRoll.toString()}`,
-                            files: [await rollRender(diceRoll)],
+                        await interaction.followUp({
+                            files: [await rollRender(diceRoll)]
                         });
                         break;
                     case 'reset':

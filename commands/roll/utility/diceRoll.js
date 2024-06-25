@@ -5,11 +5,11 @@ module.exports = class DiceRoll {
         this.diceAmount = diceAmount;
         this.bonusValue = bonusValue;
         this.#evaluate();
+        console.log(this.toString());
     }
 
     #roll(max) {
         const result = Math.floor(Math.random() * max + 1);
-        console.log('rolled ' + result + ' out of ' + max);
         return result;
     }
 
@@ -24,13 +24,13 @@ module.exports = class DiceRoll {
         this.total += this.bonusValue;
     }
 
+    getPattern() {
+        return `${this.diceAmount}${this.diceType}` + (this.bonusValue > 0 ? `+${this.bonusValue}` : '');
+    }
+
     toString() {
         let rolls = `${this.rolls.join(' ')}`;
         let bonus = this.bonusValue > 0 ? ` +${this.bonusValue}` : '';
-        return `${rolls}${bonus} => ${this.total}`;
-    }
-
-    getPattern() {
-        return `${this.diceAmount}${this.diceType}` + (this.bonusValue > 0 ? `+${this.bonusValue}` : '');
+        return `${this.getPattern()} => ${rolls}${bonus} => ${this.total}`;
     }
 }
