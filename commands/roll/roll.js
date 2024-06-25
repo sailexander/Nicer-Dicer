@@ -1,4 +1,4 @@
-const { ButtonBuilder, ButtonStyle, SlashCommandBuilder, ActionRowBuilder, userMention, MembershipScreeningFieldType } = require('discord.js');
+const { ButtonBuilder, ButtonStyle, SlashCommandBuilder, ActionRowBuilder, userMention } = require('discord.js');
 const { rollRender } = require('./utility/rollRender.js');
 const DiceRoll = require('./utility/diceRoll.js');
 
@@ -32,6 +32,7 @@ module.exports = {
                 console.log('rolling by pattern');
                 let diceRoll = await rollByPattern(input);
                 await interaction.reply({
+                    content: userMention(interaction.user.id),
                     files: [await rollRender(diceRoll)]
                 });
             } else {
@@ -74,7 +75,6 @@ async function rollByInteraction(interaction) {
     });
 
     const collector = interactiveReply.createMessageComponentCollector({});
-    console.log(1);
     collector.on('collect', async buttonInteraction => {
         let [buttonType, buttonId] = buttonInteraction.customId.split('_');
         console.log(`>> ${interaction.member.guild.name}|${interaction.user.globalName} pressed ${buttonType} ${buttonId}`);
@@ -111,6 +111,7 @@ async function rollByInteraction(interaction) {
                     case 'roll':
                         let diceRoll = new DiceRoll(currentDiceType, currentDiceAmount, currentBonusValue);
                         await interaction.followUp({
+                            content: userMention(interaction.user.id),
                             files: [await rollRender(diceRoll)]
                         });
                         break;
