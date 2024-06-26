@@ -6,6 +6,8 @@ const DICE_SIZE = 50;
 const MARGIN = 10;
 const COLOR_BACKGROUND = 'black';
 const COLOR_DICE = 'white';
+const COLOR_CRIT = '#60c39f';
+const COLOR_FAIL = '#fd7175';
 
 module.exports = { rollRender }
 
@@ -25,7 +27,8 @@ async function rollRender(diceRoll) {
             diceShapes[diceRoll.diceType] ?? diceShapes['W10'],
             diceRoll.rolls[i],
             MARGIN + i * (DICE_SIZE + MARGIN),
-            MARGIN
+            MARGIN,
+            getDiceColor(diceRoll.rolls[i], parseInt(diceRoll.diceType.substring(1)))
         );
     }
 
@@ -38,7 +41,7 @@ async function rollRender(diceRoll) {
         );
     }
 
-    renderTotal( 
+    renderTotal(
         context,
         diceRoll.total,
         canvasWidth,
@@ -46,6 +49,12 @@ async function rollRender(diceRoll) {
     );
 
     return new AttachmentBuilder(await canvas.encode('png'), { name: 'roll.png' });
+}
+
+function getDiceColor(number, max) {
+    if (number === 1) return COLOR_FAIL;
+    if (number === max) return COLOR_CRIT;
+    return COLOR_DICE;
 }
 
 async function renderDice(context, shape, number, x, y, color = COLOR_DICE) {
@@ -56,7 +65,8 @@ async function renderDice(context, shape, number, x, y, color = COLOR_DICE) {
 
     shape.forEach((path) => context.fill(path));
 
-    context.font = '20px sans-serif';
+    context.fillStyle = color;
+    context.font = '20px DejaVu Sans';
     let textMeasure = context.measureText(number.toString());
     context.fillText(number.toString(), 25 - (textMeasure.width / 2), 33);
 
@@ -66,13 +76,13 @@ async function renderDice(context, shape, number, x, y, color = COLOR_DICE) {
     context.strokeRect(25, 25, 25, 25); */
 }
 
-async function renderBonusValue(context, number, x, y, color = COLOR_DICE) {
+async function renderBonusValue(context, number, x, y) {
     context.setTransform(1, 0, 0, 1, 0, 0);
 
-    context.fillStyle = color;
+    context.fillStyle = COLOR_DICE;
     context.translate(x, y);
 
-    context.font = '20px sans-serif';
+    context.font = '20px DejaVu Sans';
     let textMeasure = context.measureText(`+ ${number.toString()}`);
     context.fillText(`+ ${number.toString()}`, 25 - (textMeasure.width / 2), 33);
 
@@ -82,13 +92,13 @@ async function renderBonusValue(context, number, x, y, color = COLOR_DICE) {
     context.strokeRect(25, 25, 25, 25); */
 }
 
-async function renderTotal(context, number, canvasWidth, y, color = COLOR_DICE) {
+async function renderTotal(context, number, canvasWidth, y) {
     context.setTransform(1, 0, 0, 1, 0, 0);
 
-    context.fillStyle = color;
+    context.fillStyle = COLOR_DICE;
     context.translate(0, y);
 
-    context.font = '40px sans-serif';
+    context.font = '40px DejaVu Sans';
     let textMeasure = context.measureText(number.toString());
     context.fillText(number.toString(), canvasWidth / 2 - (textMeasure.width / 2), 33);
 }
