@@ -4,6 +4,7 @@ const diceShapes = require('./diceShapes.js');
 
 const DICE_SIZE = 50;
 const MARGIN = 10;
+const SHADOW_OFFSET = 2;
 const COLOR_BACKGROUND = 'black';
 const COLOR_DICE = 'white';
 const COLOR_CRIT = '#60c39f';
@@ -19,9 +20,17 @@ async function rollRender(diceRoll) {
 
     //fill background
     context.fillStyle = COLOR_BACKGROUND;
-    context.fillRect(0, 0, canvasWidth, canvasHeight);
+    //context.fillRect(0, 0, canvasWidth, canvasHeight);
 
     for (let i in diceRoll.rolls) {
+        renderDice(
+            context,
+            diceShapes[diceRoll.diceType] ?? diceShapes['W10'],
+            diceRoll.rolls[i],
+            SHADOW_OFFSET + MARGIN + i * (DICE_SIZE + MARGIN),
+            SHADOW_OFFSET + MARGIN,
+            COLOR_BACKGROUND
+        );
         renderDice(
             context,
             diceShapes[diceRoll.diceType] ?? diceShapes['W10'],
@@ -36,11 +45,25 @@ async function rollRender(diceRoll) {
         renderBonusValue(
             context,
             diceRoll.bonusValue,
+            SHADOW_OFFSET + MARGIN + diceRoll.diceAmount * (DICE_SIZE + MARGIN),
+            SHADOW_OFFSET + MARGIN,
+            COLOR_BACKGROUND
+        );
+        renderBonusValue(
+            context,
+            diceRoll.bonusValue,
             MARGIN + diceRoll.diceAmount * (DICE_SIZE + MARGIN),
             MARGIN
         );
     }
 
+    renderTotal(
+        context,
+        diceRoll.total,
+        SHADOW_OFFSET + canvasWidth,
+        SHADOW_OFFSET + DICE_SIZE + 2 * MARGIN,
+        COLOR_BACKGROUND
+    );
     renderTotal(
         context,
         diceRoll.total,
@@ -76,10 +99,10 @@ async function renderDice(context, shape, number, x, y, color = COLOR_DICE) {
     context.strokeRect(25, 25, 25, 25); */
 }
 
-async function renderBonusValue(context, number, x, y) {
+async function renderBonusValue(context, number, x, y, color = COLOR_DICE) {
     context.setTransform(1, 0, 0, 1, 0, 0);
 
-    context.fillStyle = COLOR_DICE;
+    context.fillStyle = color;
     context.translate(x, y);
 
     context.font = '20px DejaVu Sans';
@@ -92,10 +115,10 @@ async function renderBonusValue(context, number, x, y) {
     context.strokeRect(25, 25, 25, 25); */
 }
 
-async function renderTotal(context, number, canvasWidth, y) {
+async function renderTotal(context, number, canvasWidth, y, color = COLOR_DICE) {
     context.setTransform(1, 0, 0, 1, 0, 0);
 
-    context.fillStyle = COLOR_DICE;
+    context.fillStyle = color;
     context.translate(0, y);
 
     context.font = '40px DejaVu Sans';
