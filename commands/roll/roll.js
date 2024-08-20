@@ -32,7 +32,7 @@ module.exports = {
                 console.log('rolling by pattern');
                 let diceRoll = await rollByPattern(input);
                 await interaction.reply({
-                    content: userMention(interaction.user.id),
+                    content: `${userMention(interaction.user.id)} ${diceRoll.getPattern()}`,
                     files: [await rollRender(diceRoll)]
                 });
             } else {
@@ -111,7 +111,7 @@ async function rollByInteraction(interaction) {
                     case 'roll':
                         let diceRoll = new DiceRoll(currentDiceType, currentDiceAmount, currentBonusValue);
                         await interaction.followUp({
-                            content: userMention(interaction.user.id),
+                            content: `${userMention(interaction.user.id)} ${diceRoll.getPattern()}`,
                             files: [await rollRender(diceRoll)]
                         });
                         break;
